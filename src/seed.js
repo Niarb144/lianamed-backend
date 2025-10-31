@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import connectDB from './config/db.js';
 import User from './models/User.js';
+import Medicine from './models/Medicine.js';
 import bcrypt from 'bcryptjs';
 
 const seed = async () => {

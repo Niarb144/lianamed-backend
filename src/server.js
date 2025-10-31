@@ -7,6 +7,7 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import adminRoutes from './routes/admin.js';
+import medicineRoutes from './routes/medicineRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -21,6 +22,7 @@ app.use(morgan('dev'));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/medicines', medicineRoutes);
 
 app.get('/', (req, res) => res.send('Health API running'));
 
