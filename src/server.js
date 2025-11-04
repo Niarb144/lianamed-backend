@@ -8,9 +8,14 @@ import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import adminRoutes from './routes/admin.js';
 import medicineRoutes from './routes/medicineRoutes.js';
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 connectDB();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -19,10 +24,14 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/medicines', medicineRoutes);
+
+
 
 app.get('/', (req, res) => res.send('Health API running'));
 

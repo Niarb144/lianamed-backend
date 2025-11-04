@@ -6,6 +6,7 @@ const medSchema = new mongoose.Schema({
   description: String,
   price: Number,
   stock: { type: Number, default: 0 },
+  image: { type: String},
 }, { timestamps: true });
 
 export default mongoose.model('Medicine', medSchema);

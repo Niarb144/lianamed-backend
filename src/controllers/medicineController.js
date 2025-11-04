@@ -4,18 +4,22 @@ import Medicine from '../models/Medicine.js';
 export const addMedicine = async (req, res) => {
   try {
     const { name, category, description, price, stock } = req.body;
+    const image = req.file ? `/uploads/${req.file.filename}` : null; // ✅ image path
 
-    if (!name || !price) {
-      return res.status(400).json({ message: 'Name and price are required' });
-    }
+    const newMedicine = new Medicine({
+      name,
+      category,
+      description,
+      price,
+      stock,
+      image,
+    });
 
-    const medicine = new Medicine({ name, category, description, price, stock });
-    await medicine.save();
-
-    res.status(201).json({ message: 'Medicine added successfully', medicine });
+    await newMedicine.save();
+    res.status(201).json({ message: "Medicine added successfully", medicine: newMedicine });
   } catch (error) {
-    console.error('Add medicine error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error adding medicine:", error);
+    res.status(500).json({ message: "Failed to add medicine" });
   }
 };
 
@@ -23,6 +27,7 @@ export const getMedicines = async (req, res) => {
   try {
     const medicines = await Medicine.find().sort({ createdAt: -1 });
     res.json(medicines);
+    // db.medicines.find({}, { name: 1, image: 1 }).pretty();
   } catch (error) {
     console.error('Fetch medicines error:', error);
     res.status(500).json({ message: 'Server error' });
