@@ -10,6 +10,7 @@ import adminRoutes from './routes/admin.js';
 import medicineRoutes from './routes/medicineRoutes.js';
 import path from "path";
 import { fileURLToPath } from "url";
+import billingRoutes from './routes/billingRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -30,6 +31,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/medicines', medicineRoutes);
+app.use('/api/billing', billingRoutes);
 
 
 
