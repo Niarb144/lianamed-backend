@@ -38,10 +38,11 @@ export const getMedicines = async (req, res) => {
 export const updateMedicine = async (req, res) => {
   try {
     const { id } = req.params;
-    const updated = await Medicine.findByIdAndUpdate(id, req.body, { new: true });
+    const updates = req.body;
+    if (req.file) updates.image = `/uploads/${req.file.filename}`;
 
-    if (!updated) return res.status(404).json({ message: "Medicine not found" });
-    res.json({ message: "Medicine updated successfully", medicine: updated });
+    const updated = await Medicine.findByIdAndUpdate(id, updates, { new: true });
+    res.json(updated);
   } catch (error) {
     console.error("Update medicine error:", error);
     res.status(500).json({ message: "Server error" });

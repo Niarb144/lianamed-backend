@@ -12,7 +12,7 @@ const router = express.Router();
 
 // Only logged-in admin can add medicine
 router.post('/add', protect, adminOnly,upload.single("image"), addMedicine);
-router.put("/:id", protect, adminOnly, updateMedicine);
+router.put("/:id", protect, adminOnly,upload.single("image"), updateMedicine);
 router.delete("/:id", protect, adminOnly, deleteMedicine);
 router.get("/", protect, getMedicines);
 

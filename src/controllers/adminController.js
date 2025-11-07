@@ -18,19 +18,19 @@ export const getAllUsers = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-  const { id } = req.params;
-  const { name, email, role } = req.body;
-
   try {
-    const user = await User.findByIdAndUpdate(
-      id,
-      { name, email, role },
-      { new: true }
-    );
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json({ message: "User updated", user });
+    const { id } = req.params;
+    const updates = req.body;
+
+    if (updates.password) {
+      updates.password = await bcrypt.hash(updates.password, 10);
+    }
+
+    const updated = await User.findByIdAndUpdate(id, updates, { new: true });
+    res.json(updated);
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error(err);
+    res.status(500).json({ message: "Failed to update user" });
   }
 };
 
