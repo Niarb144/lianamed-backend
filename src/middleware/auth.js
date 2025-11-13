@@ -27,3 +27,10 @@ export const adminOnly = (req, res, next) => {
   }
   next();
 };
+
+export const verifyPharmacist = (req, res, next) => {
+  if (req.user?.role !== 'pharmacist') {
+    return res.status(403).json({ message: 'Access denied — Pharmacist only' });
+  }
+  next();
+};
