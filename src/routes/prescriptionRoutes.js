@@ -28,6 +28,6 @@ const upload = multer({ storage });
 // 🧾 Routes
 router.post("/upload", protect, upload.single("file"), uploadPrescription);
 router.get("/my", protect, getUserPrescriptions);
-router.get("/all", verifyPharmacist, getAllPrescriptions);
+router.get("/all",protect, verifyPharmacist, getAllPrescriptions);
 
 export default router;
