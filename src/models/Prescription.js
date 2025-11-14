@@ -7,7 +7,7 @@ const prescriptionSchema = new mongoose.Schema(
     notes: { type: String },
     status: {
       type: String,
-      enum: ["pending", "reviewed", "completed"],
+      enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
     uploadedAt: { type: Date, default: Date.now },

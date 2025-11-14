@@ -1,4 +1,5 @@
 import Prescription from "../models/Prescription.js";
+import Notification from "../models/Notification.js";
 
 // 📤 Upload prescription
 export const uploadPrescription = async (req, res) => {
@@ -50,19 +51,29 @@ export const updatePrescriptionStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid status value" });
     }
 
-    const updated = await Prescription.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    );
+    const prescription = await Prescription.findById(req.params.id).populate("user");
 
-    if (!updated) {
+    if (!prescription) {
       return res.status(404).json({ message: "Prescription not found" });
     }
 
-    res.json(updated);
+    prescription.status = status;
+    await prescription.save();
+
+    // 🔔 Create Notification
+    const message =
+      status === "approved"
+        ? "Your prescription has been approved."
+        : "Your prescription has been rejected.";
+
+    await Notification.create({
+      user: prescription.user._id,
+      message,
+    });
+
+    res.json({ success: true, prescription });
   } catch (err) {
-    console.error("Error updating status:", err);
-    res.status(500).json({ message: "Failed to update prescription status." });
+    console.error("Update prescription error:", err);
+    res.status(500).json({ message: "Failed to update prescription status" });
   }
 };

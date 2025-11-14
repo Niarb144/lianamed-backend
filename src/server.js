@@ -10,6 +10,7 @@ import adminRoutes from "./routes/admin.js";
 import medicineRoutes from "./routes/medicineRoutes.js";
 import billingRoutes from "./routes/billingRoutes.js";
 import prescriptionRoutes from "./routes/prescriptionRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -73,6 +74,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/medicines", medicineRoutes);
 app.use("/api/billing", billingRoutes);
 app.use("/api/prescriptions", prescriptionRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (req, res) => res.send("Health API running"));
 
