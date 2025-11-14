@@ -6,6 +6,7 @@ import {
   uploadPrescription,
   getUserPrescriptions,
   getAllPrescriptions,
+  updatePrescriptionStatus
 } from "../controllers/prescriptionController.js";
 
 const router = express.Router();
@@ -29,5 +30,6 @@ const upload = multer({ storage });
 router.post("/upload", protect, upload.single("file"), uploadPrescription);
 router.get("/my", protect, getUserPrescriptions);
 router.get("/all",protect, verifyPharmacist, getAllPrescriptions);
+router.put("/status/:id", protect, verifyPharmacist, updatePrescriptionStatus);
 
 export default router;
