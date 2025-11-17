@@ -63,7 +63,7 @@ export const updatePrescriptionStatus = async (req, res) => {
     // 🔔 Create Notification
     const message =
       status === "approved"
-        ? "Your prescription has been approved."
+        ? "Your prescription of has been approved."
         : "Your prescription has been rejected.";
 
     await Notification.create({

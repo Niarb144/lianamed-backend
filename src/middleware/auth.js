@@ -34,3 +34,11 @@ export const verifyPharmacist = (req, res, next) => {
   }
   next();
 };
+
+export const adminOrPharmacist = (req, res, next) => {
+  if (req.user?.role === "admin" || req.user?.role === "pharmacist") {
+    return next();
+  }
+  return res.status(403).json({ message: "Access denied." });
+};
+
