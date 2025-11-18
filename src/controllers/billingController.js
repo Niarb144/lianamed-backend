@@ -1,6 +1,7 @@
 import Billing from '../models/Billing.js';
 import Medicine from '../models/Medicine.js';
 import User from '../models/User.js';
+import Notification from "../models/Notification.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -33,6 +34,7 @@ export const createOrder = async (req, res) => {
       customer: user._id,
       medicines: medicineList,
       totalAmount,
+      status: "Pending",
     });
 
     await billing.save();
@@ -74,4 +76,49 @@ export const getUserOrders = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch your orders.' });
   }
 };
+
+// PUT /api/orders/:id/status
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const updatedOrder = await Billing.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    )
+      .populate("customer", "name email")
+      .populate("medicines.med", "name price");
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // 🔔 Create Notification
+        // const message =
+        //   status === "Delivered"
+        //     ? "Your order of has been delivered."
+        //     : "Your prescription has been rejected.";
+    
+        // await Notification.create({
+        //   user: updatedOrder.user,
+        //   message,
+        // });
+
+    res.json({
+      message: `✅ Order marked as ${status}`,
+      order: updatedOrder,
+    });
+  } catch (err) {
+    console.error("Error updating order status:", err);
+    res.status(500).json({ message: "Failed to update order status" });
+  }
+};
+
 
