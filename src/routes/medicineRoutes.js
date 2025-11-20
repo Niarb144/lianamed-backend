@@ -15,7 +15,7 @@ const router = express.Router();
 router.post('/add', protect, adminOrPharmacist,upload.single("image"), addMedicine);
 router.put("/:id", protect, adminOrPharmacist,upload.single("image"), updateMedicine);
 router.delete("/:id", protect, adminOrPharmacist, deleteMedicine);
-router.get("/", protect, getMedicines);
+router.get("/", getMedicines);
 router.get("/:id", protect, getMedicineById); 
 
 export default router;

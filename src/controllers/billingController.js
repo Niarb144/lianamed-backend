@@ -5,51 +5,72 @@ import Notification from "../models/Notification.js";
 
 export const createOrder = async (req, res) => {
   try {
-    const { userId, items } = req.body;
+    const { userId, items, deliveryAddress, billingAddress, paymentMethod } = req.body;
 
-    if (!userId || !items || !items.length) {
+    if (!userId || !items || !deliveryAddress || !billingAddress || !paymentMethod) {
       return res.status(400).json({ message: "Missing order details" });
     }
 
-    // Validate user
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Validate medicines and compute total
     let totalAmount = 0;
     const medicineList = [];
 
     for (const i of items) {
       const med = await Medicine.findById(i._id);
       if (!med) continue;
+
       totalAmount += med.price * i.quantity;
-      medicineList.push({
-        med: med._id,
-        qty: i.quantity,
-        price: med.price,
-      });
+      medicineList.push({ med: med._id, qty: i.quantity, price: med.price });
     }
 
     const billing = new Billing({
       customer: user._id,
       medicines: medicineList,
       totalAmount,
+      deliveryAddress,
+      billingAddress,
+      paymentMethod,
+      paymentStatus: "Pending",
       status: "Pending",
     });
 
     await billing.save();
 
     res.status(201).json({
-      message: "✅ Order created successfully!",
-      billing,
+      message: "Order created, proceed to payment",
+      billingId: billing._id,
     });
+
   } catch (err) {
-    console.error("❌ Error creating order:", err);
-    res.status(500).json({ message: "Failed to create order", error: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Failed to create order" });
   }
 };
 
-// ✅ Fetch all orders (pharmacist only)
+// ✅ Simulate payment processing
+export const payOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { success } = req.body; // frontend tells payment result
+
+    const order = await Billing.findById(id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    order.paymentStatus = success ? "Paid" : "Failed";
+    await order.save();
+
+    res.json({ message: "Payment updated", order });
+
+  } catch (err) {
+    res.status(500).json({ message: "Payment error" });
+  }
+};
+
+
+
+// ✅ Fetch all orders (pharmacist and admin only)
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await Billing.find()
@@ -77,6 +98,21 @@ export const getUserOrders = async (req, res) => {
   }
 };
 
+// GET /billing/:id
+export const getOrderById = async (req, res) => {
+  try {
+    const order = await Billing.findById(req.params.id)
+      .populate("customer", "name email")
+      .populate("medicines.med", "name price");
+
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch order" });
+  }
+};
+
+
 // PUT /api/orders/:id/status
 export const updateOrderStatus = async (req, res) => {
   try {
@@ -99,17 +135,6 @@ export const updateOrderStatus = async (req, res) => {
     if (!updatedOrder) {
       return res.status(404).json({ message: "Order not found" });
     }
-
-    // 🔔 Create Notification
-        // const message =
-        //   status === "Delivered"
-        //     ? "Your order of has been delivered."
-        //     : "Your prescription has been rejected.";
-    
-        // await Notification.create({
-        //   user: updatedOrder.user,
-        //   message,
-        // });
 
     res.json({
       message: `✅ Order marked as ${status}`,
