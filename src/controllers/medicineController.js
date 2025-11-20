@@ -62,3 +62,18 @@ export const deleteMedicine = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// Get medicine by ID
+export const getMedicineById = async (req, res) => {
+  try {
+    const medicine = await Medicine.findById(req.params.id);
+
+    if (!medicine) {
+      return res.status(404).json({ message: "Medicine not found" });
+    }
+
+    res.json(medicine);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

@@ -4,7 +4,8 @@ import {
     addMedicine,
     getMedicines,
     updateMedicine, 
-    deleteMedicine 
+    deleteMedicine ,
+    getMedicineById
 } from '../controllers/medicineController.js';
 import { protect, adminOnly , adminOrPharmacist } from '../middleware/auth.js';
 
@@ -15,5 +16,6 @@ router.post('/add', protect, adminOrPharmacist,upload.single("image"), addMedici
 router.put("/:id", protect, adminOrPharmacist,upload.single("image"), updateMedicine);
 router.delete("/:id", protect, adminOrPharmacist, deleteMedicine);
 router.get("/", protect, getMedicines);
+router.get("/:id", protect, getMedicineById); 
 
 export default router;
