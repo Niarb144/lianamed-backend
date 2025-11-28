@@ -16,6 +16,6 @@ router.post('/add', protect, adminOrPharmacist,upload.single("image"), addMedici
 router.put("/:id", protect, adminOrPharmacist,upload.single("image"), updateMedicine);
 router.delete("/:id", protect, adminOrPharmacist, deleteMedicine);
 router.get("/", getMedicines);
-router.get("/:id", protect, getMedicineById); 
+router.get("/:id", getMedicineById); 
 
 export default router;

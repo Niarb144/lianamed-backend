@@ -11,6 +11,7 @@ import medicineRoutes from "./routes/medicineRoutes.js";
 import billingRoutes from "./routes/billingRoutes.js";
 import prescriptionRoutes from "./routes/prescriptionRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import chatRoute from "./routes/chat.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -75,6 +76,7 @@ app.use("/api/medicines", medicineRoutes);
 app.use("/api/billing", billingRoutes);
 app.use("/api/prescriptions", prescriptionRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/chat", chatRoute);
 
 app.get("/", (req, res) => res.send("Health API running"));
 

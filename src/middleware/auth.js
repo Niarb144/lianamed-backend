@@ -36,7 +36,7 @@ export const verifyPharmacist = (req, res, next) => {
 };
 
 export const adminOrPharmacist = (req, res, next) => {
-  if (req.user?.role === "admin" || req.user?.role === "pharmacist") {
+  if (req.user?.role === "admin" || req.user?.role === "pharmacist" || req.user?.role === "rider") {
     return next();
   }
   return res.status(403).json({ message: "Access denied." });
