@@ -36,10 +36,13 @@ app.use(morgan("dev"));
 app.use(
   cors({
     origin: [
+      /\.ngrok-free\.app$/,
+      "*",
       "http://localhost:5173",
       "http://192.168.0.152:5173",
-      "*", // local network React app
+       // local network React app
     ],
+    methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
 );
@@ -83,6 +86,6 @@ app.get("/", (req, res) => res.send("Health API running"));
 
 // -------------------------------
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
+app.listen(PORT,"0.0.0.0", () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
