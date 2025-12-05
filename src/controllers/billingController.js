@@ -2,6 +2,8 @@ import Billing from '../models/Billing.js';
 import Medicine from '../models/Medicine.js';
 import User from '../models/User.js';
 import Notification from "../models/Notification.js";
+import { io } from "../server.js";
+
 
 export const createOrder = async (req, res) => {
   try {
@@ -53,13 +55,35 @@ export const createOrder = async (req, res) => {
 export const payOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const { success } = req.body; // frontend tells payment result
+    const { success } = req.body;
 
-    const order = await Billing.findById(id);
+    const order = await Billing.findById(id).populate("customer", "name email");
     if (!order) return res.status(404).json({ message: "Order not found" });
 
     order.paymentStatus = success ? "Paid" : "Failed";
     await order.save();
+
+    // ------------------------------
+    // 🔔 CREATE NOTIFICATION
+    // ------------------------------
+    const notify = new Notification({
+      user: order.customer._id,
+      title: "Payment Update",
+      message: success
+        ? "Your payment was successfully processed."
+        : "Your payment failed. Please try again.",
+      read: false,
+    });
+
+    await notify.save();
+
+    // ------------------------------
+    // ⚡ REAL-TIME PUSH
+    // ------------------------------
+    io.to(order.customer._id.toString()).emit("new-notification", {
+      title: notify.title,
+      message: notify.message,
+    });
 
     res.json({ message: "Payment updated", order });
 
@@ -67,6 +91,7 @@ export const payOrder = async (req, res) => {
     res.status(500).json({ message: "Payment error" });
   }
 };
+
 
 
 
@@ -136,14 +161,37 @@ export const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    // --------------------------------------------------
+    // 🔔 CREATE DATABASE NOTIFICATION
+    // --------------------------------------------------
+    const notify = new Notification({
+      user: updatedOrder.customer._id,
+      title: "Order Status Updated",
+      message: `Your order has been: ${status}`,
+      read: false,
+    });
+
+    await notify.save();
+
+    // --------------------------------------------------
+    // ⚡ SEND REAL-TIME NOTIFICATION WITH SOCKET.IO
+    // --------------------------------------------------
+    io.to(updatedOrder.customer._id.toString()).emit("new-notification", {
+      title: notify.title,
+      message: notify.message,
+      createdAt: notify.createdAt,
+    });
+
     res.json({
       message: `✅ Order marked as ${status}`,
       order: updatedOrder,
     });
+
   } catch (err) {
     console.error("Error updating order status:", err);
     res.status(500).json({ message: "Failed to update order status" });
   }
 };
+
 
 

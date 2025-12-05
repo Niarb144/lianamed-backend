@@ -15,24 +15,28 @@ import chatRoute from "./routes/chat.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import http from "http";
+import { Server } from "socket.io";
+
 dotenv.config();
 connectDB();
 
 const app = express();
 
-// -------------------------------
-// ✅ CONFIG
-// -------------------------------
+// ---------------------------------------------------
+// 📁 FILE PATH SETUP
+// ---------------------------------------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadsPath = path.join(__dirname, "../uploads");
 
-// ✅ Secure middleware
+// ---------------------------------------------------
+// 🔒 SECURITY & CORE MIDDLEWARE
+// ---------------------------------------------------
 app.use(helmet());
 app.use(express.json());
 app.use(morgan("dev"));
 
-// ✅ Configure CORS properly
 app.use(
   cors({
     origin: [
@@ -40,16 +44,15 @@ app.use(
       "*",
       "http://localhost:5173",
       "http://192.168.0.152:5173",
-       // local network React app
     ],
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
 );
 
-// -------------------------------
-// ✅ STATIC FILE SERVING (Fix for images)
-// -------------------------------
+// ---------------------------------------------------
+// 📂 STATIC FILE SERVING (Uploads)
+// ---------------------------------------------------
 app.use(
   "/uploads",
   (req, res, next) => {
@@ -70,9 +73,9 @@ app.use(
   })
 );
 
-// -------------------------------
-// ✅ ROUTES
-// -------------------------------
+// ---------------------------------------------------
+// 🛣️ ROUTES
+// ---------------------------------------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
@@ -84,8 +87,42 @@ app.use("/api/chat", chatRoute);
 
 app.get("/", (req, res) => res.send("Health API running"));
 
-// -------------------------------
+// ---------------------------------------------------
+// ⚡ SOCKET.IO SERVER SETUP
+// ---------------------------------------------------
+const server = http.createServer(app);
+
+export const io = new Server(server, {
+  cors: {
+    origin: [
+      "*",
+      "http://localhost:5173",
+      "http://192.168.0.152:5173",
+      /\.ngrok-free\.app$/,
+    ],
+    methods: ["GET", "POST"],
+  },
+});
+
+// 🔥 Handle real-time connections
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  const userId = socket.handshake.query?.userId;
+  if (userId) {
+    socket.join(userId);
+    console.log(`User ${userId} joined room: ${userId}`);
+  }
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
+// ---------------------------------------------------
+// 🚀 START SERVER
+// ---------------------------------------------------
 const PORT = process.env.PORT || 5000;
-app.listen(PORT,"0.0.0.0", () =>
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
+server.listen(PORT, "0.0.0.0", () =>
+  console.log(`🚀 Server running with Socket.io on http://localhost:${PORT}`)
 );
