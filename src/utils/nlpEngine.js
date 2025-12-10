@@ -74,7 +74,11 @@ const categories = [
   "antibiotic",
   "allergy",
   "vitamin",
-  "supplement"
+  "supplement",
+  "ulcer",
+  "sexual health",
+  "chronic",
+  "cancer"
 ];
 
 export function detectCategory(message) {
