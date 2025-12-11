@@ -37,18 +37,32 @@ app.use(helmet());
 app.use(express.json());
 app.use(morgan("dev"));
 
-app.use(
-  cors({
-    origin: [
-      /\.ngrok-free\.app$/,
-      "*",
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl)
+    if (!origin) return callback(null, true);
+
+    // Allow localhost for development
+    const allowedOrigins = [
       "http://localhost:5173",
       "http://192.168.0.152:5173",
-    ],
-    methods: "GET,POST,PUT,DELETE",
-    credentials: true,
-  })
-);
+    ];
+
+    // Allow any ngrok domain
+    const ngrokRegex = /^https?:\/\/[a-z0-9\-]+\.ngrok\-free\.(app|dev)$/;
+
+    if (allowedOrigins.includes(origin) || ngrokRegex.test(origin)) {
+      return callback(null, true);
+    }
+
+    console.log("❌ Blocked by CORS:", origin);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: "GET,POST,PUT,DELETE",
+  allowedHeaders: "Content-Type,Authorization"
+}));
+
 
 // ---------------------------------------------------
 // 📂 STATIC FILE SERVING (Uploads)
